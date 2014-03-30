@@ -3,7 +3,7 @@ Rails View Visualizer
 
 Overview
 ---
-A tool to help visualize the view hierarchy within a Rails app.
+A tool to help visualize the view structure of a Rails app.
 
 Usage
 ---

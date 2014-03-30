@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
-  s.name        = "view_stats"
-  s.version     = "0.0.1"
+  s.name        = "view_visualizer"
+  s.version     = "0.1.0"
   s.date        = "2013-04-20"
-  s.summary     = "Rails view stats"
-  s.description = "A gem to understand your Rails view rendering"
-  s.authors     = ["Jarrett Baugh"]
-  s.email       = "jarrett.baugh@gmail.com"
+  s.summary     = "Rails view visualizer"
+  s.description = "A tool to help visualize the view structure of a Rails app."
+  s.authors     = ["John Goldsmith"]
+  s.email       = "johngoldsm1@gmail.com"
   s.files       = Dir.glob("lib/**/*")
   s.homepage    = ""
 end
