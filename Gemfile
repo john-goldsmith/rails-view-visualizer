@@ -13,3 +13,4 @@ gemspec
 # To use debugger
 # gem 'ruby-debug'
 gem 'rspec'
+gem 'rake'
