@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+require 'thor'
+
+class RailsViewVisualizer < Thor
+
+  RENDER_REGEX = /render[\s\(][:partial:\s=>\s]*["'][\w\/]*["']\)?/i
+  VIEW_PATH_REGEX = /["'][\w\/]+["']/
+
+  # render "path/to/view"
+  # render("path/to/view")
+  # render :partial => "path/to/view"
+  # render(:partial => "path/to/view")
+  # render partial: "path/to/view"
+  # render(partial: "path/to/view")
+
+  default_command :visualize
+
+  desc "visualize", "Default task"
+  option :outputdir,
+    aliases: :d,
+    default: "./doc/rails_view_visualizer/", # TODO: Check for trailing forward slash if not using default
+    type: :string,
+    desc: "Specify the output directory."
+  option :outputfile,
+    aliases: :f,
+    default: "index.html", # TODO: Separate file name and file extension
+    type: :string,
+    desc: "Specify the output filename."
+  option :inputdir,
+    aliases: :i,
+    default: "./app/views/",
+    type: :string,
+    desc: "Specify the Rails view directory."
+  option :extension,
+    aliases: :e,
+    default: "*.html.*",
+    type: :string,
+    desc: "Specify the file extension to search for."
+  def visualize
+    html_output = []
+    html_output << "<html>"
+    html_output << "<head>"
+    html_output << "</head>"
+    html_output << "<body>"
+    dirs = Dir.glob("#{options[:inputdir]}/**/#{options[:extension]}")
+
+    dirs.each do |dir|
+      html_output << "<ul>"
+      file = File.open(dir).read
+      @renders = file.scan(RENDER_REGEX)
+      @renders.each do |render|
+        html_output << "<li>"
+        html_output << render
+        html_output << "</li>"
+      end
+      html_output << "</ul>"
+    end
+    # output_file = "#{options[:outputfile]}_#{Time.now}#{output_file_extension}"
+    html_output << "</body>"
+    html_output << "</html>"
+    File.open("#{options[:outputdir]}#{options[:outputfile]}", 'w') do |f|
+      f.write(html_output.join("\n"))
+    end
+  end
+
+end
+
+RailsViewVisualizer.start(ARGV)
