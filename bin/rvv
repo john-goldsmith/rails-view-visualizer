@@ -5,16 +5,8 @@ require 'thor'
 class RailsViewVisualizer < Thor
 
   RENDER_REGEX = /render[\s\(][:partial:\s=>\s]*["'][\w\/]*["']\)?/i
-  VIEW_PATH_REGEX = /["'][\w\/]+["']/
 
-  # render "path/to/view"
-  # render("path/to/view")
-  # render :partial => "path/to/view"
-  # render(:partial => "path/to/view")
-  # render partial: "path/to/view"
-  # render(partial: "path/to/view")
-
-  default_command :visualize
+  default_command :start
 
   desc "visualize", "Default task"
   option :outputdir,
@@ -24,7 +16,7 @@ class RailsViewVisualizer < Thor
     desc: "Specify the output directory."
   option :outputfile,
     aliases: :f,
-    default: "index.html", # TODO: Separate file name and file extension
+    default: "index.html", # TODO: Separate file name and file extension; insert timestamp
     type: :string,
     desc: "Specify the output filename."
   option :inputdir,
@@ -37,31 +29,93 @@ class RailsViewVisualizer < Thor
     default: "*.html.*",
     type: :string,
     desc: "Specify the file extension to search for."
-  def visualize
-    html_output = []
-    html_output << "<html>"
-    html_output << "<head>"
-    html_output << "</head>"
-    html_output << "<body>"
-    dirs = Dir.glob("#{options[:inputdir]}/**/#{options[:extension]}")
-
-    dirs.each do |dir|
-      html_output << "<ul>"
-      file = File.open(dir).read
-      @renders = file.scan(RENDER_REGEX)
-      @renders.each do |render|
-        html_output << "<li>"
-        html_output << render
-        html_output << "</li>"
+  def start
+    files.each do |file|
+      append_html "<ul>"
+      f = File.open(file).read
+      renders_in_file(f).each do |render|
+        append_html "<li>"
+        append_html render.path
+        append_html "</li>"
       end
-      html_output << "</ul>"
+      append_html "</ul>"
     end
-    # output_file = "#{options[:outputfile]}_#{Time.now}#{output_file_extension}"
-    html_output << "</body>"
-    html_output << "</html>"
-    File.open("#{options[:outputdir]}#{options[:outputfile]}", 'w') do |f|
-      f.write(html_output.join("\n"))
+    write_output_file
+  end
+
+  private
+
+    def renders_in_file(file)
+      file.scan(RENDER_REGEX).map { |render| Render.new(render) }
     end
+
+    def files
+      @files = Dir.glob("#{options[:inputdir]}/**/#{options[:extension]}")
+    end
+
+    def append_html(html)
+      @html ||= []
+      @html << html
+    end
+
+    def html_output
+      html_header = [
+        "<!DOCTYPE html>",
+        "<html>",
+          "<head>",
+          "</head>",
+          "<body>"
+      ]
+      html_footer = [
+          "</body>",
+        "</html>"
+      ]
+      @html.unshift html_header
+      @html.concat html_footer
+      @html.flatten.join
+    end
+
+    def write_output_file
+      # output_file = "#{options[:outputfile]}_#{Time.now}#{output_file_extension}"
+      File.open("#{options[:outputdir]}#{options[:outputfile]}", 'w') do |f|
+        f.write html_output
+      end
+    end
+
+end
+
+class Render
+
+  VIEW_PATH_REGEX = /["'][\w\/]+["']/
+  PARTIAL_REGEX = /:partial|partial:/
+  LOCALS_REGEX = /:locals|locals:/
+
+  def initialize(render)
+    @render = render
+  end
+
+  def path
+    @render.match(VIEW_PATH_REGEX)[0]
+  end
+
+  def file
+  end
+
+  def is_partial?
+    !@render.scan(PARTIAL_REGEX).empty?
+  end
+
+  def is_view?
+    @render.scan(PARTIAL_REGEX).empty?
+  end
+
+  def has_locals?
+    !@render.scan(PARTIAL_REGEX).empty?
+  end
+
+  def locals
+    @render.scan(PARTIAL_REGEX)
+    locals.eval
   end
 
 end

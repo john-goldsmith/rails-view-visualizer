@@ -7,7 +7,7 @@ A tool to help visualize the view structure of a Rails app.
 
 Usage
 ---
-To use Rails View Visualizer, run `rvv visualize`, or simply `rvv`.
+To use Rails View Visualizer, run `rvv start`, or simply `rvv`.
 
 Options:
 
@@ -22,7 +22,16 @@ Known Bugs
 Todo
 ---
 * Parse controllers for implicit and explicit rendering
+* Parse "magic" renders, i.e. render @users
 * Parse layouts directory
 * Check for the existence of the view being rendered
 * Account for dynamic view paths
 * Account for local variables passed to render method
+* Check for rendering loops (X renders Y which renders X)
+
+# render "path/to/view"
+# render("path/to/view")
+# render :partial => "path/to/view"
+# render(:partial => "path/to/view")
+# render partial: "path/to/view"
+# render(partial: "path/to/view")
