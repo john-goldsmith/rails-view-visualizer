@@ -31,22 +31,15 @@ class RailsViewVisualizer < Thor
     desc: "Specify the file extension to search for."
   def start
     files.each do |file|
-      append_html "<ul>"
+      append_html '<ul class="file">'
       puts "Parsing #{file}..."
       f = File.open(file).read
+      append_html '<li class="file-name">'
+      append_html "<a href=\"#{File.basename(file)}\">#{File.basename(file)}</a>"
+      append_html "</li>"
       renders_in_file(f).each do |render|
-        puts "@"*88
-        puts render.inspect
-        puts "path_and_file = #{render.path_and_file.inspect}"
-        puts "path = #{render.path.inspect}"
-        puts "file = #{render.file.inspect}"
-        puts "is_partial? = #{render.is_partial?.inspect}"
-        puts "is_view? = #{render.is_view?.inspect}"
-        puts "has_locals? = #{render.has_locals?.inspect}"
-        puts "locals = #{render.locals.inspect}"
-        puts "@"*88
-        append_html "<li>"
-        append_html render.path
+        append_html '<li class="file-render">'
+        append_html render.path_and_file
         append_html "</li>"
       end
       append_html "</ul>"
@@ -61,7 +54,7 @@ class RailsViewVisualizer < Thor
     end
 
     def files
-      @files = Dir.glob("#{options[:inputdir]}/**/#{options[:extension]}")
+      @files ||= Dir.glob("#{options[:inputdir]}/**/#{options[:extension]}")
     end
 
     def append_html(html)
@@ -74,6 +67,7 @@ class RailsViewVisualizer < Thor
         "<!DOCTYPE html>",
         "<html>",
           "<head>",
+          "<link rel=\"stylesheet\" href=\"rails_view_visualizer.css\"",
           "</head>",
           "<body>"
       ]
@@ -109,7 +103,7 @@ class Render
   end
 
   def path_and_file
-    @render.match(PATH_AND_FILE_REGEX).to_s
+    @render.match(PATH_AND_FILE_REGEX).to_s.gsub!(/["']/, '')
   end
 
   def path

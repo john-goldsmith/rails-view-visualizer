@@ -1,0 +1,29 @@
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.file {
+  border: 1px solid #e5e5e5;
+  padding: 0;
+  margin: 10px 0;
+  list-style-type: none;
+  list-style-position: inside;
+}
+
+.file li {
+  padding: 0;
+  margin: 0;
+}
+
+.file .file-name {
+  background-color: #f2f2f2;
+  border-bottom: 1px solid #e5e5e5;
+  font-weight: bold;
+  padding: 5px;
+}
+
+.file .file-render {
+  margin-left: 10px;
+  padding: 5px;
+}

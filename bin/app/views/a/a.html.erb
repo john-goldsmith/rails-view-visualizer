@@ -1,2 +1,15 @@
 <%= render partial: "foo" %>
-<%= render partial: "bar/baz", locals: { foo: "foo", bar: 123, baz: true } %>
+<%= render partial: "foo/bar" %>
+<%= render partial: "foo/bar/baz", locals: { foo: "foo", bar: 123, baz: true } %>
+
+<%= render(partial: "foo") %>
+<%= render(partial: "foo/bar") %>
+<%= render(partial: "foo/bar/baz", locals: { foo: "foo", bar: 123, baz: true }) %>
+
+<%= render "foo" %>
+<%= render "foo/bar" %>
+<%= render "foo/bar/baz", locals: { foo: "foo", bar: 123, baz: true } %>
+
+<%= render("foo") %>
+<%= render("foo/bar") %>
+<%= render("foo/bar/baz", locals: { foo: "foo", bar: 123, baz: true }) %>
