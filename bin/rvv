@@ -4,7 +4,7 @@ require 'thor'
 
 class RailsViewVisualizer < Thor
 
-  RENDER_REGEX = /render[\s\(][:partial:\s=>\s]*["'][\w\/]*["']\)?/i
+  RENDER_REGEX = /render[\s\(][:partial=>\s]*["'][\w\/]*["'][,:locals=>\s\{]*[\w\s=>"',:]*[\}\)]*/i
 
   default_command :start
 
@@ -32,8 +32,19 @@ class RailsViewVisualizer < Thor
   def start
     files.each do |file|
       append_html "<ul>"
+      puts "Parsing #{file}..."
       f = File.open(file).read
       renders_in_file(f).each do |render|
+        puts "@"*88
+        puts render.inspect
+        puts "path_and_file = #{render.path_and_file.inspect}"
+        puts "path = #{render.path.inspect}"
+        puts "file = #{render.file.inspect}"
+        puts "is_partial? = #{render.is_partial?.inspect}"
+        puts "is_view? = #{render.is_view?.inspect}"
+        puts "has_locals? = #{render.has_locals?.inspect}"
+        puts "locals = #{render.locals.inspect}"
+        puts "@"*88
         append_html "<li>"
         append_html render.path
         append_html "</li>"
@@ -76,46 +87,54 @@ class RailsViewVisualizer < Thor
     end
 
     def write_output_file
+      puts "Writing file..."
       # output_file = "#{options[:outputfile]}_#{Time.now}#{output_file_extension}"
       File.open("#{options[:outputdir]}#{options[:outputfile]}", 'w') do |f|
         f.write html_output
       end
+      puts "Done!"
     end
 
 end
 
 class Render
 
-  VIEW_PATH_REGEX = /["'][\w\/]+["']/
+  PATH_AND_FILE_REGEX = /["'][\w\/]+["']/
   PARTIAL_REGEX = /:partial|partial:/
-  LOCALS_REGEX = /:locals|locals:/
+  LOCALS_REGEX = /:?locals:?\s?=?>?\s?\{[\s\:\w\d=>"',]*\}/i
+  LOCALS_HASH_REGEX = /\{[\s\:\w\d=>"',]*\}/i
 
   def initialize(render)
     @render = render
   end
 
+  def path_and_file
+    @render.match(PATH_AND_FILE_REGEX).to_s
+  end
+
   def path
-    @render.match(VIEW_PATH_REGEX)[0]
+    path_and_file.split("/")[0..-2].join("/")
   end
 
   def file
+    path_and_file.split("/").last
   end
 
   def is_partial?
-    !@render.scan(PARTIAL_REGEX).empty?
+    @render.match(PARTIAL_REGEX).nil? ? false : true
   end
 
   def is_view?
-    @render.scan(PARTIAL_REGEX).empty?
+    @render.match(PARTIAL_REGEX).nil? ? true : false
   end
 
   def has_locals?
-    !@render.scan(PARTIAL_REGEX).empty?
+    @render.match(LOCALS_REGEX).nil? ? false : true
   end
 
   def locals
-    @render.scan(PARTIAL_REGEX)
-    locals.eval
+    local_vars = @render.match(LOCALS_REGEX) # The entire "locals: {...}" portion"
+    eval(local_vars.to_s.match(LOCALS_HASH_REGEX).to_s) unless local_vars.nil? # Just the "{...}" portion returned as a hash
   end
 
 end

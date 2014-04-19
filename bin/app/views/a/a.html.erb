@@ -1,2 +1,2 @@
 <%= render partial: "foo" %>
-<%= render partial: "bar/baz" %>
+<%= render partial: "bar/baz", locals: { foo: "foo", bar: 123, baz: true } %>
