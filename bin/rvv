@@ -8,7 +8,7 @@ class RailsViewVisualizer < Thor
 
   default_command :start
 
-  desc "visualize", "Default task"
+  desc "start", "Default task"
   option :outputdir,
     aliases: :d,
     default: "./doc/rails_view_visualizer/", # TODO: Check for trailing forward slash if not using default
@@ -33,9 +33,10 @@ class RailsViewVisualizer < Thor
     files.each do |file|
       append_html '<ul class="file">'
       puts "Parsing #{file}..."
+      filename = File.basename(file)
       f = File.open(file).read
       append_html '<li class="file-name">'
-      append_html "<a href=\"#{File.basename(file)}\">#{File.basename(file)}</a>"
+      append_html "<a href=\"#{filename}\">#{filename}</a>"
       append_html "</li>"
       renders_in_file(f).each do |render|
         append_html '<li class="file-render">'
